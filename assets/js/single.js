@@ -1,4 +1,5 @@
 var issueContainerEl = document.querySelector("#issues-container");
+var limitWarningEl = document.querySelector("#limit-warning");
 
 var getRepoIssues = function(repo) {
     
@@ -7,15 +8,20 @@ var getRepoIssues = function(repo) {
 
     fetch(apiUrl).then(function(response) {
         //successful
-        if(response.ok) {
+        if (response.ok) {
             response.json().then(function(data) {
-                console.log(data);
-                displayIssues(data);
-        });
+              displayIssues(data);
+          
+              // check if api has paginated issues
+              if (response.headers.get("Link")) {
+                  displayWarning(repo);
+                // console.log("repo has more than 30 issues");
+              }
+            });
         }
         else {
             alert("There was a problem with your request!");
-          }
+        }
     });
 };
 
@@ -28,51 +34,66 @@ var displayIssues = function(issues) {
 
     for (var i = 0; i < issues.length; i++) {
         // create a link element to take users to the issue on github
-        var kindOf;
-        if (issues[i].pull_request) {
-                kindOf = "(Pull request)";
-            } else {
-                kindOf = "(Issue)";
-            }
-
-        var issueEl = 
-            `<a href='${issues[i].html_url}' target='_blank' class='list-item flex-row justify-space-between align-center'>
-                    <span>${issues[i].title}</span>
-                    <span>${kindOf}</span>
-             </a>
-            `;
-
-        issueContainerEl.append(issueEl);
-        // $("#issues-container").append(issueEl);
-        // var issueEl = document.createElement("a");
-        // issueEl.classList = "list-item flex-row justify-space-between align-center";
-        // issueEl.setAttribute("href", issues[i].html_url);
-        // issueEl.setAttribute("target", "_blank");
-
-        // // create span to hold issue title
-        // var titleEl = document.createElement("span");
-        // titleEl.textContent = issues[i].title;
-
-        // // append to container - put titleEl into issueEl
-        // issueEl.appendChild(titleEl);
-
-        // // create a type element
-        // var typeEl = document.createElement("span");
-
-        // // check if issue is an actual issue or a pull request
+        // var kindOf;
         // if (issues[i].pull_request) {
-        // typeEl.textContent = "(Pull request)";
-        // } else {
-        // typeEl.textContent = "(Issue)";
-        // }
+        //         kindOf = "(Pull request)";
+        //     } else {
+        //         kindOf = "(Issue)";
+        //     }
 
-        // // append to container put typeEl into issueEl
-        // issueEl.appendChild(typeEl);
+        // var issueEl = 
+        //     `<div>
+        //         <a href='${issues[i].html_url}' target='_blank' class='list-item flex-row justify-space-between align-center'>
+        //                 <span>${issues[i].title}</span>
+        //                 <span>${kindOf}</span>
+        //         </a>
+        //     </div>
+        //     `;
+            
+        // issueContainerEl.innerHTML = issueEl;
+        // issueContainerEl.append(issueEl);
+        // $("#issues-container").append(issueEl);
+        var issueEl = document.createElement("a");
+        issueEl.classList = "list-item flex-row justify-space-between align-center";
+        issueEl.setAttribute("href", issues[i].html_url);
+        issueEl.setAttribute("target", "_blank");
+
+        // create span to hold issue title
+        var titleEl = document.createElement("span");
+        titleEl.textContent = issues[i].title;
+
+        // append to container - put titleEl into issueEl
+        issueEl.appendChild(titleEl);
+
+        // create a type element
+        var typeEl = document.createElement("span");
+
+        // check if issue is an actual issue or a pull request
+        if (issues[i].pull_request) {
+        typeEl.textContent = "(Pull request)";
+        } else {
+        typeEl.textContent = "(Issue)";
+        }
+
+        // append to container put typeEl into issueEl
+        issueEl.appendChild(typeEl);
         
-        // issueContainerEl.append(issueEl); // append to container put issueEl into issueContainerEl
+        issueContainerEl.append(issueEl); // append to container put issueEl into issueContainerEl
       }
     
     
+}
+
+var displayWarning = function(repo) {
+    // add text to warning container in case there are more than 30 repos
+    limitWarningEl.textContent = "The API only allows us to pull in 30 issues. To see the rest, visit ";
+    var linkEl = document.createElement("a");
+    linkEl.textContent = "See more issues on GitHub.com";
+    linkEl.setAttribute('href', 'http://githubcom/' + repo + '/issues');
+    linkEl.setAttribute('target', '_blank');
+
+    // append to warning container
+    limitWarningEl.appendChild(linkEl);
 }
 
 getRepoIssues('facebook/react');
