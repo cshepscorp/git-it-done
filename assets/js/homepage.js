@@ -7,7 +7,6 @@ var getUserRepos = function(user) {
   // format the github api url
   var apiUrl = "https://api.github.com/users/" + user + "/repos";
   
-
   // make a request to the url
   fetch(apiUrl)
   .then(function(response) {
@@ -80,7 +79,7 @@ var displayRepos = function(repos, searchTerm) {
     } else {
       statusEl.innerHTML = "<i class='fas fa-check-square status-icon icon-success'></i>"; // if repo has no open issues, add blue check icon
     }
-
+    console.log(repos[i].open_issues_count);
     // append to container
     repoEl.appendChild(statusEl);
 
